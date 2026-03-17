@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ["sharp", "ioredis", "bull"],
-  },
+  serverExternalPackages: ["sharp", "ioredis", "bull"],
   images: {
     remotePatterns: [
       {

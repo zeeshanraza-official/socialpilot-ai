@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { CalendarPageClient } from "./calendar-client";
 
-export const metadata: Metadata = { title: "Calendar" };
+export const metadata: Metadata = { title: "Calendar | SocialPilot AI" };
 
 export default async function CalendarPage({
   searchParams,

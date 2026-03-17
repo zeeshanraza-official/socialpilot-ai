@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     // Check banned words
-    if (brand?.banned_words?.length > 0) {
+    if (brand && brand.banned_words?.length > 0) {
       const { checkBannedWords } = await import("@/lib/security/validate");
       const violations = checkBannedWords(content, brand.banned_words);
       if (violations.length > 0) {

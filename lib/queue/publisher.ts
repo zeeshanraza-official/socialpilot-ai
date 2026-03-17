@@ -8,6 +8,12 @@ import * as linkedin from "@/lib/social/linkedin";
 import * as youtube from "@/lib/social/youtube";
 import type { ContentItem, SocialAccount, Platform, PublishResult } from "@/types";
 
+// Server-side extension — encrypted token fields are never sent to the frontend
+type SocialAccountWithTokens = SocialAccount & {
+  access_token_encrypted?: string;
+  refresh_token_encrypted?: string;
+};
+
 // Circuit breaker thresholds
 const CIRCUIT_OPEN_THRESHOLD = 5;   // errors before open
 const CIRCUIT_OPEN_DURATION_MS = 5 * 60 * 1000; // 5 minutes
@@ -46,7 +52,7 @@ export async function processScheduledPost(scheduled_post_id: string): Promise<v
     return;
   }
 
-  const account: SocialAccount = scheduledPost.social_account;
+  const account: SocialAccountWithTokens = scheduledPost.social_account as SocialAccountWithTokens;
   const content: ContentItem = scheduledPost.content_item;
 
   // 2. Check circuit breaker
@@ -272,7 +278,8 @@ function validateContentForPlatform(
   platform: Platform,
   mediaUrls: string[]
 ): string | null {
-  const caption = content.platform_overrides?.[platform]?.caption || content.caption || "";
+  const platformOverride = content.platform_overrides?.[platform] as { caption?: string } | undefined;
+  const caption = platformOverride?.caption || content.caption || "";
 
   const limits: Record<Platform, number> = {
     facebook: 63206,
@@ -319,15 +326,15 @@ async function checkAndUpdateContentStatus(
 
   if (!posts) return;
 
-  const allPublished = posts.every((p) => p.status === "published");
-  const anyFailed = posts.some((p) => p.status === "failed");
+  const allPublished = posts.every((p: { status: string }) => p.status === "published");
+  const anyFailed = posts.some((p: { status: string }) => p.status === "failed");
 
   if (allPublished) {
     await supabase
       .from("content_items")
       .update({ status: "published" })
       .eq("id", content_item_id);
-  } else if (anyFailed && posts.every((p) => ["published", "failed"].includes(p.status))) {
+  } else if (anyFailed && posts.every((p: { status: string }) => ["published", "failed"].includes(p.status))) {
     await supabase
       .from("content_items")
       .update({ status: "failed" })
@@ -434,7 +441,7 @@ async function recordSuccess(
 }
 
 async function refreshTokenIfNeeded(
-  account: SocialAccount,
+  account: SocialAccountWithTokens,
   supabase: ReturnType<typeof createServiceRoleClient>
 ): Promise<string | null> {
   if (!account.refresh_token_encrypted) return null;

@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import type { ApiResponse } from "@/types";
+import type { ApiResponse, ApiError } from "@/types";
 
 export function successResponse<T>(data: T, status = 200): NextResponse {
   return NextResponse.json({ data } satisfies ApiResponse<T>, { status });
 }
 
 export function errorResponse(error: string, status = 400, code?: string): NextResponse {
-  return NextResponse.json({ error, code } satisfies ApiResponse, { status });
+  return NextResponse.json({ error, code } satisfies ApiError, { status });
 }
 
 export function unauthorizedResponse(): NextResponse {

@@ -1,9 +1,13 @@
 import OpenAI from "openai";
 import type { Brand, Platform, InboxMessage, BrandTone } from "@/types";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+let _openai: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+  if (!_openai) {
+    _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+  }
+  return _openai;
+}
 
 const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 
@@ -43,7 +47,7 @@ ${params.target_audience ? `Target audience: ${params.target_audience}` : ""}
 ${params.include_cta ? "Include a strong call-to-action." : ""}
 ${params.brand.default_hashtags.length > 0 ? `Always include these brand hashtags: ${params.brand.default_hashtags.join(" ")}` : ""}`;
 
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: MODEL,
     messages: [
       { role: "system", content: systemPrompt },
@@ -74,7 +78,7 @@ export async function generateVariations(params: {
 }): Promise<string[]> {
   const count = params.count || 3;
 
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: MODEL,
     messages: [
       {
@@ -110,7 +114,7 @@ export async function generateHashtags(params: {
 }): Promise<string[]> {
   const count = params.count || 20;
 
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: MODEL,
     messages: [
       {
@@ -145,7 +149,7 @@ export async function generateReplySuggestions(params: {
 }): Promise<Array<{ text: string; tone: string; confidence: number }>> {
   const count = params.count || 3;
 
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: MODEL,
     messages: [
       {
@@ -182,7 +186,7 @@ export async function generateYouTubeSeo(params: {
   brand: Brand;
   video_description: string;
 }): Promise<{ title: string; description: string; tags: string[] }> {
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: MODEL,
     messages: [
       {
@@ -224,7 +228,7 @@ export async function generateImage(params: {
   const brandContext = `Brand: ${params.brand.name}. Tone: ${params.brand.tone}.`;
   const enhancedPrompt = `${brandContext} ${params.prompt}. Professional quality, social media optimized.`;
 
-  const response = await openai.images.generate({
+  const response = await getOpenAI().images.generate({
     model: "dall-e-3",
     prompt: enhancedPrompt,
     n: 1,
@@ -233,9 +237,12 @@ export async function generateImage(params: {
     response_format: "url",
   });
 
+  const imageData = response.data?.[0];
+  if (!imageData?.url) throw new Error("Image generation returned no URL");
+
   return {
-    url: response.data[0].url!,
-    revised_prompt: response.data[0].revised_prompt || params.prompt,
+    url: imageData.url,
+    revised_prompt: imageData.revised_prompt || params.prompt,
   };
 }
 
@@ -245,7 +252,7 @@ export async function generateImage(params: {
 export async function analyzeSentiment(
   text: string
 ): Promise<"positive" | "neutral" | "negative"> {
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: MODEL,
     messages: [
       {

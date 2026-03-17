@@ -35,11 +35,17 @@ export default async function DashboardPage() {
       .eq("status", "unread"),
   ]);
 
+  // Normalize Supabase join result: content_item is inferred as array but is a single object at runtime
+  const normalizedPosts = (postsResult.data || []).map((p) => ({
+    ...p,
+    content_item: Array.isArray(p.content_item) ? (p.content_item[0] ?? null) : p.content_item,
+  }));
+
   const now = new Date();
-  const upcomingPosts = (postsResult.data || []).filter(
+  const upcomingPosts = normalizedPosts.filter(
     (p) => p.status === "pending" && new Date(p.scheduled_at) > now
   );
-  const recentPublished = (postsResult.data || []).filter(
+  const recentPublished = normalizedPosts.filter(
     (p) => p.status === "published"
   );
 

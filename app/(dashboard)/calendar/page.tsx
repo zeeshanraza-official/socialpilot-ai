@@ -34,10 +34,16 @@ export default async function CalendarPage({
       .order("scheduled_at"),
   ]);
 
+  // Supabase returns joined rows as arrays; normalize to single object for one-to-one relations
+  const posts = (postsResult.data || []).map((p) => ({
+    ...p,
+    content_item: Array.isArray(p.content_item) ? (p.content_item[0] ?? null) : p.content_item,
+  }));
+
   return (
     <CalendarPageClient
       brands={brandsResult.data || []}
-      scheduledPosts={postsResult.data || []}
+      scheduledPosts={posts}
       initialBrandId={searchParams.brand_id}
     />
   );

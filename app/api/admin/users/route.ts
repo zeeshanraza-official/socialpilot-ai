@@ -25,19 +25,22 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error;
 
+    type UserRow = { id: string; email: string; full_name: string | null; avatar_url: string | null; plan: string; timezone: string; onboarding_completed: boolean; created_at: string; updated_at: string };
+    type BrandRow = { user_id: string };
+
     // Get brand count per user
-    const userIds = (users || []).map((u) => u.id);
+    const userIds = (users as UserRow[] || []).map((u) => u.id);
     const { data: brandCounts } = await db
       .from("brands")
       .select("user_id")
       .in("user_id", userIds);
 
-    const brandCountMap = (brandCounts || []).reduce<Record<string, number>>((acc, b) => {
-      acc[b.user_id] = (acc[b.user_id] || 0) + 1;
-      return acc;
-    }, {});
+    const brandCountMap: Record<string, number> = {};
+    (brandCounts as BrandRow[] || []).forEach((b) => {
+      brandCountMap[b.user_id] = (brandCountMap[b.user_id] || 0) + 1;
+    });
 
-    const enriched = (users || []).map((u) => ({
+    const enriched = (users as UserRow[] || []).map((u) => ({
       ...u,
       brand_count: brandCountMap[u.id] || 0,
     }));

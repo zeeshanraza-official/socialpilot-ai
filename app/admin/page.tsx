@@ -33,7 +33,7 @@ export default async function AdminOverviewPage() {
   // Plan breakdown
   const { data: planRows } = await db.from("users").select("plan");
   const plans: Record<string, number> = {};
-  (planRows || []).forEach((r) => { plans[r.plan] = (plans[r.plan] || 0) + 1; });
+  (planRows || []).forEach((r: { plan: string }) => { plans[r.plan] = (plans[r.plan] || 0) + 1; });
 
   const stats = [
     { label: "Total Users", value: usersResult.count ?? 0, icon: Users, color: "bg-blue-500" },

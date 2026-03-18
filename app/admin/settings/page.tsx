@@ -4,7 +4,7 @@ const check = (key: string) => !!process.env[key];
 const val = (key: string, fallback = "") => process.env[key] || fallback;
 
 export default function AdminSettingsPage() {
-  const appUrl = val("NEXT_PUBLIC_APP_URL", "https://socialpilot-ai.vercel.app");
+  const appUrl = val("NEXT_PUBLIC_APP_URL", "https://socialpilot.vip");
 
   const groups = [
     {

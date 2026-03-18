@@ -25,11 +25,9 @@ export async function getOAuthUrl(params: {
     "pages_show_list",
     "pages_read_engagement",
     "pages_manage_posts",
-    "instagram_basic",
     "instagram_content_publish",
     "instagram_manage_comments",
     "instagram_manage_insights",
-    "pages_messaging",
   ].join(",");
 
   const url = new URL("https://www.facebook.com/v21.0/dialog/oauth");

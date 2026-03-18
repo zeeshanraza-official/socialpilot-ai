@@ -42,10 +42,10 @@ export async function GET() {
       .from("users")
       .select("plan");
 
-    const planBreakdown = (planData || []).reduce<Record<string, number>>((acc, u) => {
-      acc[u.plan] = (acc[u.plan] || 0) + 1;
-      return acc;
-    }, {});
+    const planBreakdown: Record<string, number> = {};
+    ((planData as { plan: string }[]) || []).forEach((u) => {
+      planBreakdown[u.plan] = (planBreakdown[u.plan] || 0) + 1;
+    });
 
     return NextResponse.json({
       data: {

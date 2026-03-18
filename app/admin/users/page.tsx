@@ -24,16 +24,19 @@ export default async function AdminUsersPage({
 
   const { data: users, count } = await dbQuery;
 
+  type UserRow = { id: string; email: string; full_name: string | null; plan: string; onboarding_completed: boolean; created_at: string };
+  type BrandRow = { user_id: string };
+
   // Brand counts
-  const userIds = (users || []).map((u) => u.id);
+  const userIds = (users as UserRow[] || []).map((u) => u.id);
   const { data: brandRows } = userIds.length
     ? await db.from("brands").select("user_id").in("user_id", userIds)
     : { data: [] };
 
   const brandMap: Record<string, number> = {};
-  (brandRows || []).forEach((b) => { brandMap[b.user_id] = (brandMap[b.user_id] || 0) + 1; });
+  (brandRows as BrandRow[] || []).forEach((b) => { brandMap[b.user_id] = (brandMap[b.user_id] || 0) + 1; });
 
-  const enriched = (users || []).map((u) => ({
+  const enriched = (users as UserRow[] || []).map((u) => ({
     ...u,
     brand_count: brandMap[u.id] || 0,
   }));

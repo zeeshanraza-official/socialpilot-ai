@@ -1,6 +1,23 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/server";
 import { AdminSidebar } from "./admin-sidebar";
+
+async function getAdminEmail(): Promise<string | null> {
+  const configured = process.env.ADMIN_EMAIL;
+  if (configured) return configured;
+
+  // Fall back to the first registered user (app owner)
+  const db = createServiceRoleClient();
+  const { data } = await db
+    .from("users")
+    .select("email")
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .single();
+
+  return data ? (data as { email: string }).email : null;
+}
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -14,7 +31,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .eq("id", authUser.id)
     .single();
 
-  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminEmail = await getAdminEmail();
+
   if (!adminEmail || user?.email !== adminEmail) {
     redirect("/dashboard");
   }

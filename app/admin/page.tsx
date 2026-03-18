@@ -107,7 +107,7 @@ export default async function AdminOverviewPage() {
             {(recentUsers || []).length === 0 ? (
               <p className="text-sm text-slate-400">No users yet.</p>
             ) : (
-              (recentUsers || []).map((u) => (
+              (recentUsers || []).map((u: { id: string; email: string; full_name: string | null; plan: string; created_at: string }) => (
                 <div key={u.id} className="flex items-center gap-3 py-1.5">
                   <div className="w-7 h-7 rounded-full bg-brand-100 flex items-center justify-center text-xs font-semibold text-brand-700 flex-shrink-0">
                     {(u.full_name || u.email).charAt(0).toUpperCase()}

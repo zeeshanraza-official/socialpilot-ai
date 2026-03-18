@@ -37,6 +37,7 @@ export function RegisterForm() {
       password: data.password,
       options: {
         data: { full_name: data.full_name },
+        emailRedirectTo: `${window.location.origin}/api/auth/callback`,
       },
     });
 

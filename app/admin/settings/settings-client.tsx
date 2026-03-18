@@ -619,7 +619,7 @@ export function SettingsClient({ groups, totalVars, setVars, appUrl }: Props) {
                   <p className="text-xs text-slate-400 font-mono mt-2"># OpenSSL (macOS/Linux)</p>
                   <pre className="text-xs text-slate-300 font-mono">openssl rand -hex 32</pre>
                   <p className="text-xs text-slate-400 font-mono mt-2"># PowerShell (Windows)</p>
-                  <pre className="text-xs text-slate-300 font-mono">-join ((0..31) | % {"{0:x2}" -f (Get-Random -Max 256)})</pre>
+                  <pre className="text-xs text-slate-300 font-mono">{`-join ((0..31) | % {"{0:x2}" -f (Get-Random -Max 256)})`}</pre>
                 </div>
               </Step>
               <Step n={3}>Run the command twice to get two different values — one for each key. Paste them directly into Vercel environment variables.</Step>
